@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>PARTEE - The Ultimate Bar Experience</title>
+
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+  
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600&family=Lora:wght@400;700&display=swap" rel="stylesheet">
+
+  <!-- Custom CSS -->
+   
+  <style>
+
+    
+    /* Global Styles */
+    body {
+      font-family: 'Lora', serif;
+      background-color: #f8f9fa;
+      color: #212529;
+      margin: 0;
+      padding: 0;
+    }
+
+    h1, h2, h3, h4 {
+      font-family: 'Poppins', sans-serif;
+    }
+
+    /* Smooth Scroll */
+    html {
+      scroll-behavior: smooth;
+    }
+
+    /* Header Section */
+    .header {
+      background-color: #1f1f1f;
+      color: #fff;
+      padding: 120px 0;
+      text-align: center;
+      background-image: url('https://via.placeholder.com/1920x1080'); /* Add a background image */
+      background-size: cover;
+      background-position: center;
+      background-attachment: fixed;
+      text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+    }
+
+    .header h1 {
+      font-size: 55px;
+      letter-spacing: 2px;
+      font-weight: bold;
+    }
+
+    .header p {
+      font-size: 20px;
+      font-weight: 400;
+    }
+
+    /* About Section */
+    .about-section {
+      padding: 80px 0;
+      background-color: #fff;
+    }
+
+    .about-section h2 {
+      text-align: center;
+      color: #212529;
+      font-size: 40px;
+      margin-bottom: 40px;
+    }
+
+    .about-section .card {
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+      border-radius: 10px;
+      border: none;
+      transition: transform 0.3s ease;
+    }
+
+    .about-section .card:hover {
+      transform: translateY(-10px);
+    }
+
+    .about-section .card-body {
+      font-size: 18px;
+    }
+
+    .bar-image {
+      width: 100%;
+      border-radius: 10px;
+      box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .bar-image:hover {
+      transform: scale(1.05);
+      transition: transform 0.3s ease;
+    }
+
+    /* Footer Section */
+    .footer {
+      background-color: #1f1f1f;
+      color: #fff;
+      padding: 40px 0;
+      text-align: center;
+      font-size: 16px;
+    }
+
+    .footer a {
+      color: #FFD700;
+      text-decoration: none;
+    }
+
+    .footer a:hover {
+      text-decoration: underline;
+    }
+
+    /* Accent Color */
+    .accent-color {
+      color: #FFD700;
+    }
+
+    .btn-custom {
+      background-color: #FFD700;
+      color: #1f1f1f;
+      padding: 12px 30px;
+      border-radius: 25px;
+      border: none;
+      font-weight: 600;
+      transition: background-color 0.3s ease;
+    }
+
+    .btn-custom:hover {
+      background-color: #e5b700;
+    }
+
+    /* Cards for Regular & VIP Booking Section */
+    .booking-section {
+      padding: 80px 0;
+      background-color: #f0f0f0;
+    }
+
+    .booking-card {
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+      border-radius: 10px;
+      transition: transform 0.3s ease;
+    }
+
+    .booking-card:hover {
+      transform: translateY(-10px);
+    }
+
+    .booking-card-body {
+      padding: 30px;
+      font-size: 18px;
+    }
+
+    .booking-card-body ul {
+      list-style-type: none;
+      padding-left: 0;
+    }
+
+    .booking-card-body ul li {
+      font-size: 16px;
+      margin: 10px 0;
+    }
+    
+    .booking-card-body h5 {
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+
+<!-- Navigation Bar -->
+<nav class="navbar navbar-expand-lg navbar-dark">
+  <div class="container">
+    <a class="navbar-brand" href="#">PARTEE</a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarNav">
+      <ul class="navbar-nav ms-auto">
+        <li class="nav-item">
+          <a class="nav-link" href="#about">About</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="#capacity">Capacity</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="#booking">Booking</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="#contact">Contact</a>
+        </li>
+      </ul>
+    </div>
+  </div>
+</nav>
+
+<!-- Header Section -->
+<header class="header">
+  <div class="container">
+    <h1>Welcome to <span class="accent-color">PARTEE</span></h1>
+    <p>Your Ultimate Bar Experience</p>
+  </div>
+</header>
+
+<!-- About Section -->
+<section class="about-section" id="about">
+  <div class="container">
+    <h2 class="accent-color">About PARTEE</h2>
+    <div class="row align-items-center">
+      <div class="col-md-6">
+        <img src="../assets/pictures/bar1.png" alt="PARTEE Bar" class="bar-image">
+      </div>
+      <div class="col-md-6">
+        <div class="card">
+          <div class="card-body">
+            <h4 class="accent-color">What is PARTEE?</h4>
+            <p>PARTEE is more than just a bar; it's a place to unwind, enjoy great music, and indulge in exquisite cocktails. With our stylish ambiance and fantastic drinks, we guarantee a memorable night out!</p>
+            <a href="#capacity" class="btn btn-custom">See Our Capacity</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Capacity Section -->
+<section class="about-section" id="capacity">
+  <div class="container text-center">
+    <h2 class="accent-color">Our Capacity</h2>
+    <div class="row">
+      <div class="col-md-4">
+        <div class="card">
+          <div class="card-body">
+            <h4 class="accent-color">Total Capacity</h4>
+            <p>250 people</p>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="card">
+          <div class="card-body">
+            <h4 class="accent-color">Regular Customers</h4>
+            <p>200 people</p>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="card">
+          <div class="card-body">
+            <h4 class="accent-color">VIP Guests</h4>
+            <p>50 people</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Booking Section -->
+<section class="booking-section" id="booking">
+  <div class="container text-center">
+    <h2 class="accent-color">Book Your Table</h2>
+    <div class="row">
+      <!-- Regular Booking Card -->
+      <div class="col-md-6 mb-4">
+        <div class="card booking-card">
+          <div class="card-body">
+            <h5 class="accent-color">Regular Booking</h5>
+            <ul>
+              <li>Access to general seating</li>
+              <li>Variety of cocktails and drinks</li>
+              <li>Live music or DJ</li>
+              <li>Non-VIP seating areas</li>
+            </ul>
+            <a href="UI/forms-regular.html" class="btn btn-custom">Book Regular Table</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- VIP Booking Card -->
+      <div class="col-md-6 mb-4">
+        <div class="card booking-card">
+          <div class="card-body">
+            <h5 class="accent-color">VIP Booking</h5>
+            <ul>
+              <li>Private VIP seating</li>
+              <li>Premium cocktails and drinks</li>
+              <li>Exclusive access to VIP areas</li>
+              <li>Personalized service</li>
+            </ul>
+            <a href="UI/forms-vip.html" class="btn btn-custom">Book VIP Table</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Footer Section -->
+<footer class="footer" id="contact">
+  <div class="container">
+    <p>&copy; 2025 PARTEE Bar. All Rights Reserved. | <a href="mailto:contact@partee.com">contact@partee.com</a></p>
+    <p>Brgy. IV-A San Pablo City, Laguna</p>
+  </div>
+</footer>
+
+<!-- Bootstrap JS & Popper.js -->
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.10.2/dist/umd/popper.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.min.js"></script>
+
+</body>
+</html>

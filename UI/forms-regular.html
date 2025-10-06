@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Regular Booking - PARTEE</title>
+
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600&family=Lora:wght@400;700&display=swap" rel="stylesheet">
+
+  <!-- Custom CSS -->
+  <style>
+    body {
+      font-family: 'Lora', serif;
+      background-color: #f8f9fa;
+      margin: 0;
+      padding: 0;
+    }
+
+    .header {
+      background-color: #212529;
+      color: #fff;
+      text-align: center;
+      padding: 60px 0;
+    }
+
+    .header h1 {
+      font-family: 'Poppins', sans-serif;
+      font-size: 50px;
+      margin-bottom: 20px;
+    }
+
+    .header p {
+      font-size: 20px;
+      font-weight: 400;
+    }
+
+    .form-section {
+      padding: 50px 0;
+      background-color: #fff;
+    }
+
+    .form-section h2 {
+      text-align: center;
+      font-family: 'Poppins', sans-serif;
+      color: #212529;
+      font-size: 40px;
+      margin-bottom: 40px;
+    }
+
+    .form-container {
+      max-width: 800px;
+      margin: 0 auto;
+      background-color: #fff;
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .form-group label {
+      font-size: 16px;
+      font-weight: 600;
+    }
+
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+      font-size: 16px;
+      padding: 12px;
+      border-radius: 5px;
+      border: 1px solid #ddd;
+      width: 100%;
+    }
+
+    .form-group textarea {
+      resize: vertical;
+      height: 120px;
+    }
+
+    .btn-custom {
+      background-color: #FFD700;
+      color: #212529;
+      padding: 12px 30px;
+      border-radius: 25px;
+      border: none;
+      font-weight: 600;
+      transition: background-color 0.3s ease;
+    }
+
+    .btn-custom:hover {
+      background-color: #e5b700;
+    }
+
+    .btn-back {
+      background-color: #6c757d;
+      color: white;
+      padding: 12px 30px;
+      border-radius: 25px;
+      border: none;
+      font-weight: 600;
+      text-decoration: none;
+    }
+
+    .btn-back:hover {
+      background-color: #5a6368;
+    }
+  </style>
+</head>
+<body>
+
+<!-- Header Section -->
+<header class="header">
+  <div class="container">
+    <h1>Regular Booking Form</h1>
+    <p>Fill in the details to book your regular table at PARTEE</p>
+  </div>
+</header>
+
+<!-- Booking Form Section -->
+<section class="form-section">
+  <div class="container">
+    <h2>Book Your Table</h2>
+    <div class="form-container">
+  <form id="bookingForm" action="submit-booking.php" method="POST">
+    
+    <!-- Name Field -->
+    <div class="form-group">
+      <label for="name">Full Name</label>
+      <input type="text" id="name" name="name" required placeholder="Enter your full name">
+    </div>
+
+    <!-- Birthday Field -->
+    <div class="form-group">
+      <label for="birthday">Date of Birth</label>
+      <input type="date" id="birthday" name="birthday" required>
+    </div>
+
+    <!-- Contact Information Field -->
+    <div class="form-group">
+      <label for="contact">Contact Number</label>
+      <input type="tel" id="contact" name="contact" required placeholder="Enter your contact number">
+    </div>
+
+    <!-- Event Date Field -->
+    <div class="form-group">
+      <label for="event_date">Event Date</label>
+      <input type="date" id="event_date" name="event_date" required>
+    </div>
+
+    <!-- Number of Accompanied Guests -->
+    <div class="form-group">
+      <label for="num_guests">Number of Guests (Including Yourself)</label>
+      <input type="number" id="num_guests" name="num_guests" required placeholder="Enter number of guests">
+    </div>
+
+    <!-- Event Type Field -->
+    <div class="form-group">
+      <label for="event_type">Event Type</label>
+      <select id="event_type" name="event_type" required>
+        <option value="" disabled selected>Select your event</option>
+        <option value="Birthday">Birthday</option>
+        <option value="Celebration">Celebration</option>
+        <option value="Private Party">Private Party</option>
+        <option value="Other">Other</option>
+      </select>
+    </div>
+
+    <!-- Submit and Back Button Section -->
+    <div class="button-container">
+        <!-- Back Button -->
+      <a href="index.html" class="btn-back" id="backButton">Back to Home</a>
+
+
+      <!-- Submit Button -->
+      <button type="submit" class="btn-custom">Submit Booking</button>
+      
+      
+    </div>
+    
+  </form>
+</div>
+
+  </div>
+</section>
+
+<!-- JavaScript for Form Validation on Navigation -->
+<script>
+  let form = document.getElementById("bookingForm");
+
+  // Check if any form field has data entered
+  window.addEventListener('beforeunload', function (event) {
+    let formData = form.elements;
+    for (let i = 0; i < formData.length; i++) {
+      if (formData[i].value) {
+        // If form contains data, prompt the user
+        event.preventDefault();
+        event.returnValue = '';  // Standard for modern browsers
+      }
+    }
+  });
+
+  // Prevent navigating back to index.html if the form is filled out
+  document.getElementById("backButton").addEventListener("click", function (e) {
+    let formData = form.elements;
+    for (let i = 0; i < formData.length; i++) {
+      if (formData[i].value) {
+        if (!confirm("You have entered data in the form. If you go back, your data will be lost. Are you sure you want to leave?")) {
+          e.preventDefault();
+        }
+      }
+    }
+  });
+</script>
+
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.10.2/dist/umd/popper.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.min.js"></script>
+
+</body>
+</html>
