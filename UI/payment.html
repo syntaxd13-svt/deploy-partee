@@ -1,96 +1,107 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8">
-  <title>Payment – PARTEE</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.105/font/bootstrap-icons.css" rel="stylesheet">
-  <style>
-    body{font-family:'Lora',serif;background:#f8f9fa}
-    .header{background:#212529;color:#fff;text-align:center;padding:60px 0 30px}
-    .header h1{font-family:'Poppins',sans-serif;font-size:50px;margin-bottom:10px}
-    .price-box{background:#FFD700;color:#212529;border-radius:12px;padding:25px;font-size:1.4rem;font-weight:600}
-    .wallet-btn{width:100%;margin-bottom:15px;font-weight:600;border-radius:25px}
-    .btn-back{background:#6c757d;color:#fff;padding:10px 25px;border-radius:25px;text-decoration:none;display:inline-block;font-weight:600}
-  </style>
+<meta charset="UTF-8">
+<title>VIP Payment – PARTEE</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+<style>
+  body {font-family:'Lora',serif;background:#f8f9fa;}
+  .header {background:#212529;color:#fff;text-align:center;padding:50px 0;}
+  .price-box {background:#FFD700;color:#212529;padding:25px;border-radius:12px;font-weight:600;text-align:center;margin-bottom:30px;}
+  .wallet-btn {width:100%;margin-bottom:15px;font-weight:600;border-radius:25px;padding:12px;font-size:1.1rem;}
+</style>
 </head>
 <body>
-
 <header class="header">
-  <div class="container">
-    <a href="seat-selection-vip.html" class="btn-back mb-3">← Back to Seats</a>
-    <h1>Checkout</h1>
-    <p class="mb-0">Review amount and pay with your favourite e-wallet</p>
-  </div>
+  <h1>Complete Your VIP Payment</h1>
 </header>
 
-<div class="container py-5">
-  <div class="row justify-content-center">
-    <div class="col-lg-6">
+<div class="container py-5" style="max-width:500px">
+  <div class="price-box">
+    <h4 id="customerName">—</h4>
+    <div id="totalPrice" style="font-size:2rem">—</div>
+    <p>₱1000 × <span id="guestCount">—</span> guest(s)</p>
+  </div>
 
-      <!-- Amount -->
-      <div class="price-box text-center mb-4">
-        <div class="mb-2">Total amount to pay</div>
-        <div id="totalPrice" style="font-size:2.2rem">—</div>
-        <div class="small mt-2">₱ 500 × <span id="guestCount">—</span> guest(s)</div>
-      </div>
+  <h5 class="text-center mb-3">Choose your payment method</h5>
+  <button class="btn btn-primary wallet-btn" onclick="pay('GCash')">Pay with GCash</button>
+  <button class="btn btn-success wallet-btn" onclick="pay('Maya')">Pay with Maya</button>
+  <button class="btn btn-warning wallet-btn text-dark" onclick="pay('Other')">Pay with Other Method</button>
 
-      <!-- E-Wallets -->
-      <h5 class="mb-3">Choose e-wallet</h5>
-      <button class="btn btn-success wallet-btn" onclick="pay('GCash')">
-        <i class="bi bi-qr-code"></i> Pay with GCash
-      </button>
-      <button class="btn btn-primary wallet-btn" onclick="pay('Maya')">
-        <i class="bi bi-credit-card"></i> Pay with Maya
-      </button>
-      <button class="btn btn-warning wallet-btn text-dark" onclick="pay('GrabPay')">
-        <i class="bi bi-wallet2"></i> Pay with GrabPay
-      </button>
-
-      <!-- Finish -->
-      <div class="d-grid mt-4">
-        <button class="btn btn-dark btn-lg" onclick="finish()">Finish &amp; Get Ticket</button>
-      </div>
-
-    </div>
+  <div class="text-center mt-4">
+    <button class="btn btn-outline-secondary" onclick="cancel()">Cancel Booking</button>
   </div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
-/* ===== CONFIG ===== */
-const PRICE_PER_GUEST = 500; // <-- change rate here
+const { createClient } = supabase;
+const client = createClient(
+  "https://qoronghxfdamvuxmbjqx.supabase.co",
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFvcm9uZ2h4ZmRhbXZ1eG1ianF4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjAzMTA3NjksImV4cCI6MjA3NTg4Njc2OX0.YJqas5o80oWwfzkpbTQ3ci6CxTuQ_nkOobV6sg0NMXg"
+);
 
-/* ===== READ GUESTS ===== */
-const urlParams = new URLSearchParams(window.location.search);
-const guests = parseInt(urlParams.get('guests')) || 1;
-const total  = guests * PRICE_PER_GUEST;
+const params = new URLSearchParams(window.location.search);
+const bookingId = params.get("booking_id");
+const name = params.get("name");
+const guests = parseInt(params.get("guests")) || 1;
+const PRICE = 1000;
+const total = guests * PRICE;
 
-document.getElementById('guestCount').textContent = guests;
-document.getElementById('totalPrice').textContent = '₱ ' + total.toLocaleString();
+document.getElementById("customerName").textContent = name;
+document.getElementById("guestCount").textContent = guests;
+document.getElementById("totalPrice").textContent = "₱" + total.toLocaleString();
 
-/* ===== E-WALLET HANDLER ===== */
-function pay(wallet){
-  /* copy exact amount to clipboard */
-  navigator.clipboard.writeText(total.toString()).then(()=>{
-    alert(`Amount ₱ ${total} copied to clipboard.\nYou will now be redirected to ${wallet}.`);
-  });
-  /* open app / qr deep-link */
-  const links = {
-    GCash: 'gcash://payqr',
-    Maya:  'maya://pay',
-    GrabPay:'grabpay://pay'
-  };
-  window.open(links[wallet] || '#', '_blank');
+async function pay(method) {
+  if (method !== "GCash") {
+    alert(`Currently only GCash integration is live.`);
+    return;
+  }
+
+  try {
+    // 1️⃣ Create a GCash checkout source through your backend
+    const response = await fetch("/api/create-gcash-payment.php", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        booking_id: bookingId,
+        name: name,
+        amount: total
+      })
+    });
+
+    const result = await response.json();
+    if (!result.data || !result.data.attributes) throw new Error("Invalid GCash API response.");
+
+    const checkoutUrl = result.data.attributes.redirect.checkout_url;
+
+    // 2️⃣ Mark booking as awaiting payment
+    await client.from("vip_bookings").update({ status: "processing" }).eq("id", bookingId);
+
+    // 3️⃣ Redirect to GCash payment page
+    window.location.href = checkoutUrl;
+  } catch (err) {
+    console.error(err);
+    alert("❌ Failed to create GCash payment: " + err.message);
+  }
 }
 
-/* ===== FINISH ===== */
-function finish(){
-  alert('Payment successful! Your VIP e-ticket has been sent to your email/phone.');
-  /* wire to back-end here */
+async function cancel() {
+  if (!confirm("Cancel this booking?")) return;
+  await client.from("vip_bookings").delete().eq("id", bookingId);
+  await client.from("vip_seats").delete().eq("booking_id", bookingId);
+  alert("Booking cancelled.");
+  window.location.href = "../index.html";
 }
+
+// Clean up if user leaves before payment
+window.addEventListener("beforeunload", async () => {
+  const { data } = await client.from("vip_bookings").select("status").eq("id", bookingId).maybeSingle();
+  if (data && data.status === "pending") {
+    await client.from("vip_bookings").delete().eq("id", bookingId);
+    await client.from("vip_seats").delete().eq("booking_id", bookingId);
+  }
+});
 </script>
-
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
