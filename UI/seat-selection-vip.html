@@ -205,8 +205,8 @@
         const { error } = await client.from("vip_seats").insert(seatData);
         if (error) throw error;
 
-        // Proceed to payment
-        window.location.href = `payment.html?booking_id=${bookingId}&name=${encodeURIComponent(name)}&guests=${guestCount}`;
+        // Proceed to payment WITH TYPE PARAMETER
+        window.location.href = `payment.html?booking_id=${bookingId}&name=${encodeURIComponent(name)}&guests=${guestCount}&type=vip`;
       } catch (err) {
         console.error(err);
         alert("❌ Error saving seat selection: " + err.message);

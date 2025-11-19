@@ -37,9 +37,16 @@
   <div id="failed" style="display:none">
     <div style="font-size:80px;color:#dc3545">✗</div>
     <h2 style="color:#dc3545">Payment Not Found</h2>
-    <p>We couldn't find your payment. It may have been cancelled or is still processing.</p>
+    <p id="failedMessage">We couldn't find your payment. It may have been cancelled or is still processing.</p>
     <button class="btn btn-primary mt-3" onclick="checkAgain()">Check Again</button>
     <a href="payment.html" class="btn btn-outline-secondary mt-3">Try Again</a>
+  </div>
+
+  <div id="error" style="display:none">
+    <div style="font-size:80px;color:#dc3545">⚠️</div>
+    <h2 style="color:#dc3545">Error</h2>
+    <p id="errorMessage"></p>
+    <a href="../index.html" class="btn btn-outline-secondary mt-3">Return to Home</a>
   </div>
 </div>
 
@@ -52,64 +59,128 @@ const client = createClient(
 );
 
 const params = new URLSearchParams(window.location.search);
-const bookingId = params.get("booking_id");
-const name = params.get("name");
-const amount = params.get("amount");
+let bookingId = params.get("booking_id");
+let name = params.get("name");
+let amount = params.get("amount");
+
+console.log("payment-status.html - Initial params:", { bookingId, name, amount });
+
+// Fallback to sessionStorage if URL params are missing
+if (!bookingId || !name || !amount) {
+  const bookingInfo = sessionStorage.getItem('booking_info');
+  if (bookingInfo) {
+    try {
+      const data = JSON.parse(bookingInfo);
+      bookingId = data.bookingId;
+      name = data.name;
+      amount = data.total;
+      console.log("Using sessionStorage:", { bookingId, name, amount });
+    } catch (e) {
+      console.error("Failed to parse sessionStorage:", e);
+      showError("Invalid booking data. Please try again.");
+    }
+  }
+}
 
 async function checkPaymentStatus() {
   try {
+    if (!bookingId || bookingId === "null") {
+      showError("Booking ID is missing or invalid. Please try booking again.");
+      return;
+    }
+
+    console.log("Checking payment status for booking:", bookingId);
+
+    // Get booking type from sessionStorage or URL
+    const bookingInfo = sessionStorage.getItem('booking_info');
+    let bookingType = "vip"; // default
+    if (bookingInfo) {
+      try {
+        bookingType = JSON.parse(bookingInfo).bookingType || "vip";
+      } catch (e) {
+        console.error("Failed to parse booking type:", e);
+      }
+    }
+
+    // Query the correct table
+    const tableName = bookingType === "regular" ? "regular_bookings" : "vip_bookings";
+    console.log("Querying table:", tableName);
+    
     const { data: booking, error } = await client
-      .from("vip_bookings")
+      .from(tableName)
       .select("status")
       .eq("id", bookingId)
-      .single();
+      .maybeSingle();
     
-    if (error) throw error;
+    if (error) {
+      console.error("Query error:", error);
+      showError("Unable to check payment status. Please try again.");
+      return;
+    }
     
+    if (!booking) {
+      console.log("No booking found with ID:", bookingId);
+      document.getElementById("checking").style.display = "none";
+      document.getElementById("failed").style.display = "block";
+      document.getElementById("failedMessage").textContent = 
+        `No booking found. The booking may have expired or been cancelled.`;
+      return;
+    }
+    
+    console.log("Booking status:", booking.status);
     document.getElementById("checking").style.display = "none";
     
     if (booking.status === "paid") {
-      // Payment successful
       document.getElementById("success").style.display = "block";
       document.getElementById("successMessage").textContent = 
         `Thank you, ${name}! Your payment of ₱${parseFloat(amount).toLocaleString()} was successful.`;
       
-      // Update the view ticket button with proper query params
       document.getElementById("viewTicketBtn").href = 
         `payment-success.html?booking_id=${bookingId}&name=${encodeURIComponent(name)}&amount=${amount}`;
       
-      // Log the payment
+      // Log payment
       await client.from("payments").insert({
         booking_id: bookingId,
-        booking_type: "vip",
-        amount: parseFloat(amount),
-        method: "GCash",
-        status: "completed"
+        booking_type: bookingType,
+        total_amount: parseFloat(amount),
+        payment_method: "GCash",
+        status: "paid"
       });
       
-    } else if (booking.status === "processing") {
-      // Still processing
+      sessionStorage.removeItem('booking_info');
+      
+    } else if (booking.status === "pending") {
       document.getElementById("pending").style.display = "block";
-    } else {
-      // Failed or cancelled
+    } else if (booking.status === "cancelled") {
       document.getElementById("failed").style.display = "block";
+      document.getElementById("failedMessage").textContent = 
+        `This booking has been cancelled. Please create a new booking.`;
+    } else {
+      document.getElementById("failed").style.display = "block";
+      document.getElementById("failedMessage").textContent = 
+        `Payment status: ${booking.status}. Please try again or contact support.`;
     }
     
   } catch (err) {
     console.error("Status check failed:", err);
-    document.getElementById("checking").style.display = "none";
-    document.getElementById("failed").style.display = "block";
+    showError(`Error: ${err.message}`);
   }
+}
+
+function showError(message) {
+  document.getElementById("checking").style.display = "none";
+  document.getElementById("error").style.display = "block";
+  document.getElementById("errorMessage").textContent = message;
 }
 
 function checkAgain() {
   document.getElementById("pending").style.display = "none";
   document.getElementById("failed").style.display = "none";
+  document.getElementById("error").style.display = "none";
   document.getElementById("checking").style.display = "block";
-  setTimeout(checkPaymentStatus, 1000);
+  setTimeout(checkPaymentStatus, 1500);
 }
 
-// Auto-check on load
 checkPaymentStatus();
 </script>
 </body>

@@ -10,26 +10,56 @@
 </head>
 <body>
 <div class="container" style="max-width:600px">
-  <h1 class="mb-4">🎉 Thank you for your payment!</h1>
-  <p class="lead">Click the button below to verify your payment and get your ticket.</p>
-  <button class="btn btn-primary btn-lg mt-3" onclick="verifyPayment()">Verify Payment & Get Ticket</button>
-  <p class="text-muted mt-4">If the button doesn't work, <a href="#" onclick="verifyPayment()">click here</a></p>
+  <h1 class="mb-4">🎉 Complete Your Payment</h1>
+  <div class="alert alert-info">
+    <strong>Step 1:</strong> Complete your payment in the PayMongo tab that opened<br>
+    <strong>Step 2:</strong> After payment, return here and click the button below
+  </div>
+  <button class="btn btn-primary btn-lg mt-3" onclick="verifyPayment()">✓ I've Completed Payment - Verify Now</button>
+  <p class="text-muted mt-4">Payment not working? <a href="#" onclick="verifyPayment()">Click here</a> to check status</p>
 </div>
 
 <script>
 function verifyPayment() {
-  const pending = sessionStorage.getItem('pending_booking');
-  if (pending) {
-    const { bookingId, name, amount } = JSON.parse(pending);
-    window.location.href = `payment-status.html?booking_id=${bookingId}&name=${encodeURIComponent(name)}&amount=${amount}`;
+  // Get booking info from URL parameters FIRST
+  const params = new URLSearchParams(window.location.search);
+  let bookingId = params.get('booking_id');
+  let name = params.get('name');
+  let amount = params.get('amount');
+  
+  console.log("Verify payment - URL params:", { bookingId, name, amount });
+  
+  // If URL params are missing, try sessionStorage
+  if (!bookingId || !name || !amount) {
+    const bookingInfo = sessionStorage.getItem('booking_info');
+    if (bookingInfo) {
+      try {
+        const data = JSON.parse(bookingInfo);
+        bookingId = data.bookingId;
+        name = data.name;
+        amount = data.total;
+        console.log("Using sessionStorage fallback:", { bookingId, name, amount });
+      } catch (e) {
+        console.error("Failed to parse sessionStorage:", e);
+      }
+    }
+  }
+  
+  if (bookingId && name && amount) {
+    const statusUrl = `payment-status.html?booking_id=${bookingId}&name=${encodeURIComponent(name)}&amount=${amount}`;
+    console.log("Redirecting to:", statusUrl);
+    window.location.href = statusUrl;
   } else {
-    alert('No pending payment found. Please try booking again.');
+    alert('❌ No pending payment found. Please try booking again.');
     window.location.href = '../index.html';
   }
 }
 
-// Auto-redirect after 3 seconds
-setTimeout(verifyPayment, 3000);
+// Auto-check parameters on load
+window.addEventListener('load', () => {
+  const params = new URLSearchParams(window.location.search);
+  console.log("payment-return.html loaded with params:", Object.fromEntries(params));
+});
 </script>
 </body>
 </html>
