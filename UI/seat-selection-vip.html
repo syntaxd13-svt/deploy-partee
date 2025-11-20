@@ -24,20 +24,117 @@
     }
     .container {
       padding: 40px 15px;
+      max-width: 1400px;
+      margin: 0 auto;
     }
-    .table-section {
-      text-align: center;
-      margin-bottom: 50px;
+    .main-layout {
+      display: grid;
+      grid-template-columns: 350px 1fr;
+      gap: 30px;
+      margin-bottom: 30px;
     }
-    .vip-table {
-      display: inline-grid;
-      grid-template-columns: repeat(4, 60px);
-      grid-gap: 10px;
+    .left-section {
       background: #fff;
-      padding: 25px;
+      padding: 30px;
       border-radius: 15px;
       box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-      margin: 20px;
+      height: fit-content;
+    }
+    .right-section {
+      background: #fff;
+      padding: 30px;
+      border-radius: 15px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+      display: flex;
+      flex-direction: column;
+    }
+    .section-title {
+      font-size: 24px;
+      font-weight: bold;
+      margin-bottom: 20px;
+      text-align: center;
+      color: #212529;
+      text-transform: uppercase;
+    }
+    .seat-layout-image {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    .seat-layout-image img {
+      max-width: 100%;
+      height: auto;
+      border-radius: 10px;
+    }
+    .legend {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+      margin-top: 20px;
+    }
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .legend-box {
+      width: 30px;
+      height: 30px;
+      border-radius: 5px;
+      border: 2px solid #ccc;
+      flex-shrink: 0;
+    }
+    .legend-box.available {
+      background: #fff;
+    }
+    .legend-box.selected {
+      background: #FFD700;
+      border-color: #ccaa00;
+    }
+    .legend-box.reserved {
+      background: #ddd;
+      border-color: #aaa;
+    }
+    .tables-scroll {
+      overflow-y: auto;
+      max-height: 500px;
+      padding-right: 10px;
+    }
+    .tables-scroll::-webkit-scrollbar {
+      width: 8px;
+    }
+    .tables-scroll::-webkit-scrollbar-track {
+      background: #f1f1f1;
+      border-radius: 10px;
+    }
+    .tables-scroll::-webkit-scrollbar-thumb {
+      background: #888;
+      border-radius: 10px;
+    }
+    .tables-scroll::-webkit-scrollbar-thumb:hover {
+      background: #555;
+    }
+    .tables-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+    .vip-table {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      background: #f8f9fa;
+      padding: 20px;
+      border-radius: 10px;
+      border: 2px solid #e0e0e0;
+      justify-content: center;
+    }
+    .table-title {
+      width: 100%;
+      text-align: center;
+      font-weight: bold;
+      margin-bottom: 10px;
+      font-size: 18px;
+      color: #212529;
     }
     .seat {
       width: 60px;
@@ -50,10 +147,12 @@
       cursor: pointer;
       transition: all 0.2s ease-in-out;
       user-select: none;
+      background: #fff;
     }
-    .seat:hover {
+    .seat:hover:not(.reserved) {
       border-color: #FFD700;
       background: #fffbe6;
+      transform: translateY(-2px);
     }
     .seat.selected {
       background: #FFD700;
@@ -66,17 +165,51 @@
       border-color: #aaa;
       cursor: not-allowed;
     }
+    .button-container {
+      text-align: center;
+      margin-top: 30px;
+    }
     .btn-custom {
       background: #FFD700;
       border: none;
       color: #212529;
-      padding: 12px 30px;
+      padding: 15px 50px;
       border-radius: 25px;
       font-weight: 600;
+      font-size: 16px;
       transition: background 0.3s;
+      cursor: pointer;
     }
-    .btn-custom:hover {
+    .btn-custom:hover:not(:disabled) {
       background: #e5b700;
+    }
+    .btn-custom:disabled {
+      background: #ccc;
+      cursor: not-allowed;
+    }
+    .loading {
+      text-align: center;
+      padding: 40px;
+      font-size: 18px;
+      color: #666;
+    }
+    .guest-count-info {
+      background: #fff3cd;
+      padding: 15px;
+      border-radius: 10px;
+      margin-bottom: 20px;
+      text-align: center;
+      font-weight: 600;
+      color: #856404;
+      border: 1px solid #ffeaa7;
+    }
+    .debug-info {
+      background: #e3f2fd;
+      padding: 10px;
+      margin: 10px 0;
+      border-radius: 5px;
+      font-size: 12px;
+      font-family: monospace;
     }
   </style>
 </head>
@@ -86,13 +219,51 @@
     <p>Select your table and seats below</p>
   </header>
 
-  <div class="container text-center">
-    <div class="table-section">
-      <h3 class="mb-3">Choose Your Table</h3>
-      <div id="tablesContainer"></div>
-    </div>
+  <div class="container">
+    <div id="loadingMessage" class="loading">Loading available seats...</div>
+    
+    <div id="mainContent" style="display: none;">
+      <div class="main-layout">
+        <!-- Left Section: Seat Layout -->
+        <div class="left-section">
+          <h3 class="section-title">Seat Layout</h3>
+          <div class="seat-layout-image">
+            <img src="../assets/pictures/seat-asset.jpg" alt="Seat Layout">
+          </div>
+          <div class="legend">
+            <div class="legend-item">
+              <div class="legend-box available"></div>
+              <span>Available</span>
+            </div>
+            <div class="legend-item">
+              <div class="legend-box selected"></div>
+              <span>Selected</span>
+            </div>
+            <div class="legend-item">
+              <div class="legend-box reserved"></div>
+              <span>Reserved</span>
+            </div>
+          </div>
+          <div id="debugInfo" class="debug-info" style="display: none;"></div>
+        </div>
 
-    <button id="confirmBtn" class="btn btn-custom mt-4">Confirm Seats & Proceed to Payment</button>
+        <!-- Right Section: Table Selection -->
+        <div class="right-section">
+          <h3 class="section-title">Choose Your Table</h3>
+          <div class="guest-count-info">
+            Select <span id="guestCountDisplay"></span> seat(s) for your booking
+          </div>
+          <div class="tables-scroll">
+            <div class="tables-grid" id="tablesContainer"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Submit Button at Bottom Center -->
+      <div class="button-container">
+        <button id="confirmBtn" class="btn-custom">Confirm Seats & Proceed to Payment</button>
+      </div>
+    </div>
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -109,48 +280,179 @@
     const name = params.get("name");
     const guestCount = parseInt(params.get("guests")) || 1;
 
-    // Layout: 4 tables, each with 8 seats
+    // Layout based on actual seating arrangement
     const tables = {
-      "VIP A": 8,
-      "VIP B": 8,
-      "VIP C": 8,
-      "VIP D": 8
+      "TABLE A": ["A1", "A2", "A3", "A4", "A5", "A6", "A7", "A8", "A9", "A10", "A11"],
+      "TABLE B": ["B1", "B2", "B3", "B4"],
+      "TABLE C": ["C1", "C2", "C3", "C4", "C5", "C6", "C7", "C8"],
+      "TABLE D": ["D1", "D2", "D3", "D4"],
+      "TABLE E": ["E1", "E2", "E3", "E4", "E5", "E6", "E7", "E8"],
+      "TABLE F": ["F1", "F2", "F3", "F4"],
+      "STAGE": ["S1", "S2", "S3", "S4", "S5", "S6", "S7"],
+      "BAR": ["S8", "S9", "S10", "S11", "S12", "S13", "S14", "S15"]
     };
 
     const selectedSeats = [];
-    const tablesContainer = document.getElementById("tablesContainer");
+    const reservedSeats = new Set();
+    let eventDate = null;
 
-    // Render all tables
-    Object.entries(tables).forEach(([tableName, seatCount]) => {
+    const tablesContainer = document.getElementById("tablesContainer");
+    const loadingMessage = document.getElementById("loadingMessage");
+    const confirmBtn = document.getElementById("confirmBtn");
+    const guestCountDisplay = document.getElementById("guestCountDisplay");
+    const debugInfo = document.getElementById("debugInfo");
+
+    // Initialize
+    async function initialize() {
+      try {
+        console.log("Starting initialization...");
+        console.log("Booking ID:", bookingId);
+
+        // Get the event date for this booking
+        const { data: booking, error: bookingError } = await client
+          .from("vip_bookings")
+          .select("event_date")
+          .eq("id", bookingId)
+          .single();
+
+        if (bookingError) {
+          console.error("Booking error:", bookingError);
+          throw bookingError;
+        }
+        if (!booking) throw new Error("Booking not found");
+
+        eventDate = booking.event_date;
+        console.log("Event date:", eventDate);
+
+        // Query 1: Try with event_date column (if it exists)
+        console.log("Attempting to fetch reserved seats with event_date...");
+        let { data: reserved, error: reservedError } = await client
+          .from("vip_seats")
+          .select("table_name, seat_code, booking_id, event_date")
+          .eq("event_date", eventDate)
+          .eq("is_reserved", true);
+
+        // If event_date column doesn't exist, fall back to joining through bookings
+        if (reservedError && reservedError.message.includes("event_date")) {
+          console.log("event_date column not found, using fallback method...");
+          
+          // Get all bookings for this date
+          const { data: bookingsOnDate, error: bookingsError } = await client
+            .from("vip_bookings")
+            .select("id")
+            .eq("event_date", eventDate);
+
+          if (bookingsError) throw bookingsError;
+          console.log("Bookings on date:", bookingsOnDate);
+
+          if (bookingsOnDate && bookingsOnDate.length > 0) {
+            const bookingIds = bookingsOnDate.map(b => b.id);
+            
+            const { data: seatsData, error: seatsError } = await client
+              .from("vip_seats")
+              .select("table_name, seat_code, booking_id")
+              .eq("is_reserved", true)
+              .in("booking_id", bookingIds);
+
+            if (seatsError) throw seatsError;
+            reserved = seatsData;
+          } else {
+            reserved = [];
+          }
+        } else if (reservedError) {
+          throw reservedError;
+        }
+
+        console.log("Reserved seats found:", reserved);
+
+        // Store reserved seats (excluding current booking)
+        if (reserved && Array.isArray(reserved)) {
+          reserved.forEach(seat => {
+            if (seat.booking_id !== bookingId) {
+              const key = `${seat.table_name}:${seat.seat_code}`;
+              reservedSeats.add(key);
+              console.log("Reserved seat added:", key);
+            }
+          });
+        }
+
+        console.log("Total reserved seats (excluding current):", reservedSeats.size);
+
+        // Debug display (optional - remove in production)
+        debugInfo.innerHTML = `
+          Event Date: ${eventDate}<br>
+          Reserved Seats: ${reservedSeats.size}<br>
+          ${Array.from(reservedSeats).join(', ')}
+        `;
+        debugInfo.style.display = 'block';
+
+        // Render the seat layout
+        renderTables();
+
+        // Show the interface
+        loadingMessage.style.display = "none";
+        document.getElementById("mainContent").style.display = "block";
+        guestCountDisplay.textContent = guestCount;
+
+      } catch (err) {
+        console.error("Initialization error:", err);
+        loadingMessage.innerHTML = `<span style="color: red;">❌ Error loading seats: ${err.message}</span>`;
+      }
+    }
+
+    // Render all tables with seat availability
+    function renderTables() {
+      Object.entries(tables).forEach(([tableName, seats]) => {
+        const tableDiv = createTableElement(tableName, seats);
+        tablesContainer.appendChild(tableDiv);
+      });
+    }
+
+    function createTableElement(tableName, seats) {
       const tableDiv = document.createElement("div");
       tableDiv.classList.add("vip-table");
-      const title = document.createElement("h5");
+      
+      const title = document.createElement("div");
+      title.className = "table-title";
       title.textContent = tableName;
-      title.style.gridColumn = "span 4";
       tableDiv.appendChild(title);
 
-      for (let i = 1; i <= seatCount; i++) {
+      seats.forEach(seatCode => {
         const seat = document.createElement("div");
         seat.className = "seat";
-        seat.textContent = `${tableName.split(' ')[1]}-${i}`;
+        seat.textContent = seatCode;
         seat.dataset.table = tableName;
+        seat.dataset.code = seatCode;
 
-        seat.addEventListener("click", () => handleSeatClick(seat));
+        // Check if seat is already reserved
+        const seatKey = `${tableName}:${seatCode}`;
+        if (reservedSeats.has(seatKey)) {
+          seat.classList.add("reserved");
+          seat.title = "Already booked for this date";
+          console.log("Marking as reserved:", seatKey);
+        } else {
+          seat.addEventListener("click", () => handleSeatClick(seat));
+        }
+
         tableDiv.appendChild(seat);
-      }
+      });
 
-      tablesContainer.appendChild(tableDiv);
-    });
+      return tableDiv;
+    }
 
     function handleSeatClick(seat) {
-      if (seat.classList.contains("reserved")) return;
+      if (seat.classList.contains("reserved")) {
+        alert("⚠️ This seat is already booked for this date.");
+        return;
+      }
 
       const alreadySelected = seat.classList.contains("selected");
       const table = seat.dataset.table;
+      const code = seat.dataset.code;
 
       if (alreadySelected) {
         seat.classList.remove("selected");
-        const index = selectedSeats.findIndex(s => s.code === seat.textContent);
+        const index = selectedSeats.findIndex(s => s.code === code);
         selectedSeats.splice(index, 1);
       } else {
         // Only allow seats from the same table
@@ -159,59 +461,116 @@
           return;
         }
 
+        // Enforce guest count limit
         if (selectedSeats.length >= guestCount) {
-          alert(`You can only select ${guestCount} seat(s).`);
+          alert(`⚠️ You can only select ${guestCount} seat(s) based on your number of guests.`);
           return;
         }
 
         seat.classList.add("selected");
-        selectedSeats.push({ table, code: seat.textContent });
+        selectedSeats.push({ table, code });
+      }
+
+      // Update button state
+      updateConfirmButton();
+    }
+
+    function updateConfirmButton() {
+      if (selectedSeats.length === guestCount) {
+        confirmBtn.disabled = false;
+        confirmBtn.textContent = `Confirm ${selectedSeats.length} Seat(s) & Proceed to Payment`;
+      } else {
+        confirmBtn.disabled = true;
+        confirmBtn.textContent = `Select ${guestCount - selectedSeats.length} more seat(s)`;
       }
     }
 
-    // Automatically suggest all seats from the same table if user selects one
-    function recommendSeats() {
-      if (guestCount > 1 && selectedSeats.length === 1) {
-        const table = selectedSeats[0].table;
-        const allSeats = document.querySelectorAll(`[data-table='${table}']`);
-        let needed = guestCount - 1;
-
-        for (let seat of allSeats) {
-          if (!seat.classList.contains("selected") && !seat.classList.contains("reserved") && needed > 0) {
-            seat.classList.add("selected");
-            selectedSeats.push({ table, code: seat.textContent });
-            needed--;
-          }
-        }
-      }
-    }
-
-    document.getElementById("confirmBtn").addEventListener("click", async () => {
-      if (selectedSeats.length === 0) {
-        alert("Please select at least one seat.");
+    confirmBtn.addEventListener("click", async () => {
+      if (selectedSeats.length !== guestCount) {
+        alert(`⚠️ Please select exactly ${guestCount} seat(s).`);
         return;
       }
 
-      // If only one chosen, auto-recommend remaining seats from same table
-      if (selectedSeats.length < guestCount) recommendSeats();
+      confirmBtn.disabled = true;
+      confirmBtn.textContent = "Processing...";
 
       try {
+        // Double-check seat availability before inserting
+        const seatCodes = selectedSeats.map(s => s.code);
+        const tableNames = selectedSeats.map(s => s.table);
+
+        // Try with event_date first
+        let { data: existingSeats, error: checkError } = await client
+          .from("vip_seats")
+          .select("seat_code, table_name, booking_id")
+          .in("seat_code", seatCodes)
+          .in("table_name", tableNames)
+          .eq("event_date", eventDate)
+          .eq("is_reserved", true);
+
+        // Fallback if event_date doesn't exist
+        if (checkError && checkError.message.includes("event_date")) {
+          const { data: bookingsOnDate } = await client
+            .from("vip_bookings")
+            .select("id")
+            .eq("event_date", eventDate);
+
+          if (bookingsOnDate && bookingsOnDate.length > 0) {
+            const bookingIds = bookingsOnDate.map(b => b.id);
+            
+            const { data: seatsData, error: seatsError } = await client
+              .from("vip_seats")
+              .select("seat_code, table_name, booking_id")
+              .in("seat_code", seatCodes)
+              .in("table_name", tableNames)
+              .eq("is_reserved", true)
+              .in("booking_id", bookingIds);
+
+            if (seatsError) throw seatsError;
+            existingSeats = seatsData;
+          } else {
+            existingSeats = [];
+          }
+        } else if (checkError) {
+          throw checkError;
+        }
+
+        // Filter out seats from current booking
+        const conflictingSeats = existingSeats?.filter(s => s.booking_id !== bookingId) || [];
+
+        if (conflictingSeats.length > 0) {
+          const conflictList = conflictingSeats.map(s => s.seat_code).join(", ");
+          throw new Error(`The following seats were just booked: ${conflictList}. Please select different seats.`);
+        }
+
+        // Insert selected seats with event_date
         const seatData = selectedSeats.map(s => ({
           booking_id: bookingId,
           table_name: s.table,
-          seat_code: s.code
+          seat_code: s.code,
+          is_reserved: true,
+          event_date: eventDate
         }));
 
-        const { error } = await client.from("vip_seats").insert(seatData);
-        if (error) throw error;
+        const { error: insertError } = await client
+          .from("vip_seats")
+          .insert(seatData);
 
-        // Proceed to payment WITH TYPE PARAMETER
+        if (insertError) throw insertError;
+
+        // Proceed to payment
         window.location.href = `payment.html?booking_id=${bookingId}&name=${encodeURIComponent(name)}&guests=${guestCount}&type=vip`;
+
       } catch (err) {
         console.error(err);
         alert("❌ Error saving seat selection: " + err.message);
+        confirmBtn.disabled = false;
+        updateConfirmButton();
       }
     });
+
+    // Initialize the page
+    initialize();
   </script>
 </body>
 </html>
